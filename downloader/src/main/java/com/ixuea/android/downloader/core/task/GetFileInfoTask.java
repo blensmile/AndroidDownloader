@@ -38,9 +38,9 @@ public class GetFileInfoTask implements Runnable {
         try {
             executeConnection();
         } catch (DownloadException e) {
-            downloadResponse.handleException(e);
+            downloadResponse.handleException(downloadInfo, e);
         } catch (Exception e) {
-            downloadResponse.handleException(new DownloadException(EXCEPTION_OTHER, e));
+            downloadResponse.handleException(downloadInfo, new DownloadException(EXCEPTION_OTHER, e));
         }
     }
 

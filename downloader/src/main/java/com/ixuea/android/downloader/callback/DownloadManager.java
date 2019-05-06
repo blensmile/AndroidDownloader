@@ -32,4 +32,6 @@ public interface DownloadManager {
     void resumeAll();
 
     void pauseAll();
+
+    void onDownloadFailed(DownloadInfo downloadInfo);
 }

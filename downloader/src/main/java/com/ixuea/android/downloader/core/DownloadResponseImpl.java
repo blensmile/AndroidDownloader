@@ -5,6 +5,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import com.ixuea.android.downloader.callback.DownloadManager;
 import com.ixuea.android.downloader.db.DownloadDBController;
 import com.ixuea.android.downloader.domain.DownloadInfo;
 import com.ixuea.android.downloader.domain.DownloadThreadInfo;
@@ -19,8 +20,10 @@ public class DownloadResponseImpl implements DownloadResponse {
     private static final String TAG = "DownloadResponseImpl";
     private final Handler handler;
     private final DownloadDBController downloadDBController;
+    private final DownloadManager downloadManager;
 
-    public DownloadResponseImpl(DownloadDBController downloadDBController) {
+    public DownloadResponseImpl(DownloadManager downloadManager,DownloadDBController downloadDBController) {
+        this.downloadManager = downloadManager;
         this.downloadDBController = downloadDBController;
 
         handler = new Handler(Looper.getMainLooper()) {
@@ -77,14 +80,7 @@ public class DownloadResponseImpl implements DownloadResponse {
 
     @Override
     public void onStatusChanged(DownloadInfo downloadInfo) {
-        if (downloadInfo.getStatus() != DownloadInfo.STATUS_REMOVED) {
-            downloadDBController.createOrUpdate(downloadInfo);
-            if (downloadInfo.getDownloadThreadInfos() != null) {
-                for (DownloadThreadInfo threadInfo : downloadInfo.getDownloadThreadInfos()) {
-                    downloadDBController.createOrUpdate(threadInfo);
-                }
-            }
-        }
+        createOrUpdateDownloadInfo(downloadInfo);
 
         Message message = handler.obtainMessage(downloadInfo.getId().hashCode());
         message.obj = downloadInfo;
@@ -93,8 +89,31 @@ public class DownloadResponseImpl implements DownloadResponse {
         Log.d(TAG, "progress:" + downloadInfo.getProgress() + ",size:" + downloadInfo.getSize());
     }
 
-    @Override
-    public void handleException(DownloadException exception) {
+    private void createOrUpdateDownloadInfo(DownloadInfo downloadInfo) {
+        if (downloadInfo.getStatus() != DownloadInfo.STATUS_REMOVED) {
+            downloadDBController.createOrUpdate(downloadInfo);
+            if (downloadInfo.getDownloadThreadInfos() != null) {
+                for (DownloadThreadInfo threadInfo : downloadInfo.getDownloadThreadInfos()) {
+                    downloadDBController.createOrUpdate(threadInfo);
+                }
+            }
+        }
+    }
 
+    @Override
+    public void handleException(DownloadInfo downloadInfo, DownloadException exception) {
+        downloadInfo.setStatus(DownloadInfo.STATUS_ERROR);
+        downloadInfo.setException(exception);
+
+        createOrUpdateDownloadInfo(downloadInfo);
+
+        Message message = handler.obtainMessage(downloadInfo.getId().hashCode());
+        message.obj = downloadInfo;
+        message.sendToTarget();
+
+        Log.e(TAG, "handleException:" + exception.getLocalizedMessage());
+
+        //下载下一个文件
+        downloadManager.onDownloadFailed(downloadInfo);
     }
 }

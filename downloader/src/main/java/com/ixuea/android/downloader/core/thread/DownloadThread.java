@@ -57,10 +57,7 @@ public class DownloadThread implements Runnable {
         } catch (DownloadException e) {
 
             //        if (retryDownloadCount >= config.getRetryDownloadCount()) {
-            downloadInfo.setStatus(DownloadInfo.STATUS_ERROR);
-            downloadInfo.setException(e);
-            downloadResponse.onStatusChanged(downloadInfo);
-            downloadResponse.handleException(e);
+            downloadResponse.handleException(downloadInfo,e);
             //        }
             //
             //        retryDownloadCount++;

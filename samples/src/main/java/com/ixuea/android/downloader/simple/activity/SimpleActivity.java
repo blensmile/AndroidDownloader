@@ -56,6 +56,8 @@ public class SimpleActivity extends BaseActivity implements OnClickListener {
 
         downloadInfo = downloadManager.getDownloadById(DEFAULT_URL);
 
+        setDownloadListener();
+
         refresh();
     }
 
@@ -71,9 +73,17 @@ public class SimpleActivity extends BaseActivity implements OnClickListener {
                 tv_download_info.setText("");
                 break;
             case DownloadInfo.STATUS_PAUSED:
-            case DownloadInfo.STATUS_ERROR:
                 bt_download_button.setText("Continue");
                 tv_download_info.setText("Paused");
+                break;
+            case DownloadInfo.STATUS_ERROR:
+                bt_download_button.setText("Continue");
+
+                String errorMessage="";
+                if (downloadInfo.getException() != null) {
+                    errorMessage=downloadInfo.getException().getLocalizedMessage();
+                }
+                tv_download_info.setText("Download fail:"+errorMessage);
                 break;
 
             case DownloadInfo.STATUS_DOWNLOADING:
@@ -108,6 +118,11 @@ public class SimpleActivity extends BaseActivity implements OnClickListener {
         downloadInfo = new Builder().setUrl(DEFAULT_URL)
                 .setPath(path)
                 .build();
+        setDownloadListener();
+        downloadManager.download(downloadInfo);
+    }
+
+    private void setDownloadListener() {
         downloadInfo.setDownloadListener(new DownloadListener() {
 
             @Override
@@ -150,10 +165,10 @@ public class SimpleActivity extends BaseActivity implements OnClickListener {
 
             @Override
             public void onDownloadFailed(DownloadException e) {
+                bt_download_button.setText("Continue");
                 tv_download_info.setText("Download fail:" + e.getMessage());
             }
         });
-        downloadManager.download(downloadInfo);
     }
 
     @Override

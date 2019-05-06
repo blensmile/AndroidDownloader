@@ -63,7 +63,7 @@ public final class DownloadManagerImpl implements DownloadManager, DownloadTaskL
 
         executorService = Executors.newFixedThreadPool(this.config.getDownloadThread());
 
-        downloadResponse = new DownloadResponseImpl(downloadDBController);
+        downloadResponse = new DownloadResponseImpl(this,downloadDBController);
     }
 
     public static DownloadManager getInstance(Context context, Config config) {
@@ -181,6 +181,13 @@ public final class DownloadManagerImpl implements DownloadManager, DownloadTaskL
                 pauseInner(downloadInfo);
             }
         }
+    }
+
+    @Override
+    public void onDownloadFailed(DownloadInfo downloadInfo) {
+        cacheDownloadTask.remove(downloadInfo.getId());
+        downloadResponse.onStatusChanged(downloadInfo);
+        prepareDownloadNextTask();
     }
 
     private void pauseInner(DownloadInfo downloadInfo) {

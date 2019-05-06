@@ -11,5 +11,5 @@ public interface DownloadResponse {
 
     void onStatusChanged(DownloadInfo downloadInfo);
 
-    void handleException(DownloadException exception);
+    void handleException(DownloadInfo downloadInfo, DownloadException exception);
 }
