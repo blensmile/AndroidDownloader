@@ -83,12 +83,12 @@ afterEvaluate {
             xml.enabled = false
             html.enabled = true
 
-            xml {
-                destination "$project.buildDir/findbugs.xml"
-            }
-            html {
-                destination "$project.buildDir/findbugs.html"
-            }
+//            xml {
+//                destination "$project.buildDir/findbugs.xml"
+//            }
+//            html {
+//                destination "$project.buildDir/findbugs.html"
+//            }
         }
     }
 
