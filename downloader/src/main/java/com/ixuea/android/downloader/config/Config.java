@@ -20,7 +20,7 @@ public class Config {
     private int eachDownloadThread = 2;
     private String databaseName = "download_info.db";
     //  private String databaseName = "/sdcard/d/download_info.db";
-    private int databaseVersion = 2;
+    private int databaseVersion = 3;
     private int retryDownloadCount = 2;
     private DownloadDBController downloadDBController;
 

@@ -73,6 +73,8 @@ public class DownloadInfo implements Serializable {
      * Support multi-threaded download.
      */
     private int supportRanges;
+    private String extra;
+    private Object object;
 
     private List<DownloadThreadInfo> downloadThreadInfos;
 
@@ -167,6 +169,22 @@ public class DownloadInfo implements Serializable {
         this.supportRanges = supportRanges ? 0 : 1;
     }
 
+    public String getExtra() {
+        return extra;
+    }
+
+    public void setExtra(String extra) {
+        this.extra = extra;
+    }
+
+    public Object getObject() {
+        return object;
+    }
+
+    public void setObject(Object object) {
+        this.object = object;
+    }
+
     public List<DownloadThreadInfo> getDownloadThreadInfos() {
         return downloadThreadInfos;
     }
@@ -221,6 +239,7 @@ public class DownloadInfo implements Serializable {
         private long createAt = -1;
         private String url;
         private String path;
+        private String extra;
 
         public Builder() {
 
@@ -249,6 +268,11 @@ public class DownloadInfo implements Serializable {
             return this;
         }
 
+        public Builder setExtra(String extra){
+            this.extra = extra;
+            return this;
+        }
+
         public DownloadInfo build() {
             DownloadInfo downloadInfo = new DownloadInfo();
 
@@ -265,8 +289,12 @@ public class DownloadInfo implements Serializable {
             downloadInfo.setPath(path);
 
             if (createAt == -1) {
-                setCreateAt(System.currentTimeMillis());
+                downloadInfo.setCreateAt(System.currentTimeMillis());
+            }else {
+                downloadInfo.setCreateAt(createAt);
             }
+
+            downloadInfo.setExtra(extra);
 
             if (TextUtils.isEmpty(id)) {
                 downloadInfo.setId(url);
