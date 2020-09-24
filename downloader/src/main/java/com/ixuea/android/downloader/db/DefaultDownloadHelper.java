@@ -14,12 +14,27 @@ public class DefaultDownloadHelper extends SQLiteOpenHelper {
 
     public static final String TABLE_NAME_DOWNLOAD_INFO = "download_info";
     public static final String TABLE_NAME_DOWNLOAD_THREAD_INFO = "download_thread_info";
+    public static final String TABLE_NAME_ITEM_INFO = "item_info";
     private static final String SQL_CREATE_DOWNLOAD_TABLE = String.format(
-            "CREATE TABLE %s (_id varchar(255) PRIMARY KEY NOT NULL,supportRanges integer NOT NULL,createAt long NOT NULL,uri varchar(255) NOT NULL,path varchar(255) NOT NULL,size long NOT NULL, progress long NOT NULL,status integer NOT NULL,extra text);",
+            "CREATE TABLE %s (_id varchar(255) PRIMARY KEY NOT NULL,supportRanges integer NOT NULL,createAt long NOT NULL,uri varchar(255) NOT NULL,path varchar(255) NOT NULL,size long NOT NULL, progress long NOT NULL,status integer NOT NULL,extra text,preview varchar(255),itemId varchar(255));",
             TABLE_NAME_DOWNLOAD_INFO);
     private static final String SQL_CREATE_DOWNLOAD_THREAD_TABLE = String.format(
             "CREATE TABLE %s (_id integer PRIMARY KEY NOT NULL,threadId integer NOT NULL,downloadInfoId varchar(255) NOT NULL,uri varchar(255) NOT NULL,start long NOT NULL,end long NOT NULL,progress long NOT NULL);",
             TABLE_NAME_DOWNLOAD_THREAD_INFO);
+    private static final String SQL_CREATE_ITEM_TABLE = String.format(
+            "CREATE TABLE %s (_id varchar(255) PRIMARY KEY NOT NULL," +
+                    "itemId varchar(255) NOT NULL," +
+                    "userId varchar(255) NOT NULL," +
+                    "userName varchar(255) NOT NULL," +
+                    "userAvatar varchar(255) NOT NULL," +
+                    "brefText varchar(255) NOT NULL," +
+                    "preview varchar(255) NOT NULL," +
+                    "createAt long NOT NULL," +
+                    "rating int," +
+                    "status int," +
+                    "origin text," +
+                    "extra text);" ,
+            TABLE_NAME_ITEM_INFO);
 
 
     public DefaultDownloadHelper(Context context, Config config) {
@@ -34,16 +49,26 @@ public class DefaultDownloadHelper extends SQLiteOpenHelper {
     private void createTable(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_DOWNLOAD_TABLE);
         db.execSQL(SQL_CREATE_DOWNLOAD_THREAD_TABLE);
+        db.execSQL(SQL_CREATE_ITEM_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //version is changed in com.ixuea.android.downloader.config.Config
         //TODO upgrade database
-        if(oldVersion <3 && newVersion == 3){
+        if(oldVersion < 3){
             db.execSQL(String.format("alter table %s add column extra text",TABLE_NAME_DOWNLOAD_INFO));
         }
+        if(oldVersion < 4){
+            db.execSQL(String.format("alter table %s add column preview varchar(255)",TABLE_NAME_DOWNLOAD_INFO));
+            db.execSQL(String.format("alter table %s add column itemId varchar(255)",TABLE_NAME_DOWNLOAD_INFO));
+            db.execSQL(SQL_CREATE_ITEM_TABLE);
+        }
+    }
 
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        super.onDowngrade(db, oldVersion, newVersion);
     }
 
     //  CREATE TABLE download_info (

@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.ixuea.android.downloader.config.Config;
 import com.ixuea.android.downloader.domain.DownloadInfo;
 import com.ixuea.android.downloader.domain.DownloadThreadInfo;
+import com.ixuea.android.downloader.domain.ItemInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,22 +25,31 @@ public final class DefaultDownloadDBController implements DownloadDBController {
     public static final String[] DOWNLOAD_INFO_COLUMNS = new String[]{"_id", "supportRanges",
             "createAt", "uri",
             "path", "size", "progress",
-            "status","extra"};
+            "status","extra","preview","itemId"};
 
     public static final String[] DOWNLOAD_THREAD_INFO_COLUMNS = new String[]{"_id", "threadId",
             "downloadInfoId", "uri",
             "start", "end", "progress"};
+
+    public static final String[] ITEM_INFO_COLUMNS = new String[]{"_id","itemId",
+            "userId","userName","userAvatar", "brefText","preview",
+            "createAt","rating", "status", "origin","extra"};
+
     public static final String SQL_UPDATE_DOWNLOAD_THREAD_INFO = String.format(
             "REPLACE INTO %s (_id,threadId,downloadInfoId,uri,start,end,progress) VALUES(?,?,?,?,?,?,?);",
             DefaultDownloadHelper.TABLE_NAME_DOWNLOAD_THREAD_INFO);
 
     public static final String SQL_UPDATE_DOWNLOAD_INFO = String.format(
-            "REPLACE INTO %s (_id,supportRanges,createAt,uri,path,size,progress,status,extra) VALUES(?,?,?,?,?,?,?,?,?);",
+            "REPLACE INTO %s (_id,supportRanges,createAt,uri,path,size,progress,status,extra,preview,itemId) VALUES(?,?,?,?,?,?,?,?,?,?,?);",
             DefaultDownloadHelper.TABLE_NAME_DOWNLOAD_INFO);
 
     public static final String SQL_UPDATE_DOWNLOADING_INFO_STATUS = String.format(
             "UPDATE %s SET status=? WHERE status!=?;",
             DefaultDownloadHelper.TABLE_NAME_DOWNLOAD_INFO);
+
+    public static final String SQL_UPDATE_ITEM_INFO = String.format(
+            "REPLACE INTO %s (_id,itemId,userId,userName,userAvatar,brefText,preview,createAt,rating,status,origin,extra) VALUES(?,?,?,?,?,?,?,?,?,?,?,?);",
+            DefaultDownloadHelper.TABLE_NAME_ITEM_INFO);
 
     private final Context context;
     private final DefaultDownloadHelper dbHelper;
@@ -85,6 +95,20 @@ public final class DefaultDownloadDBController implements DownloadDBController {
         return downloads;
     }
 
+    public List<ItemInfo> findItem(String itemId) {
+        Cursor cursor = readableDatabase.query(DefaultDownloadHelper.TABLE_NAME_ITEM_INFO,
+                ITEM_INFO_COLUMNS, "id=?", new String[]{
+                        itemId}, null, null, "createAt desc");
+
+        List<ItemInfo> infoList = new ArrayList<>();
+        while(cursor.moveToNext()){
+            ItemInfo info = new ItemInfo();
+            inflateItemInfo(cursor,info);
+            infoList.add(info);
+        }
+        return infoList;
+    }
+
     @Override
     public List<DownloadInfo> findAllDownloaded() {
         Cursor cursor = readableDatabase.query(DefaultDownloadHelper.TABLE_NAME_DOWNLOAD_INFO,
@@ -121,6 +145,23 @@ public final class DefaultDownloadDBController implements DownloadDBController {
         downloadInfo.setProgress(cursor.getLong(6));
         downloadInfo.setStatus(cursor.getInt(7));
         downloadInfo.setExtra(cursor.getString(8));
+        downloadInfo.setPreview(cursor.getString(9));
+        downloadInfo.setItemId(cursor.getString(10));
+    }
+
+    private void inflateItemInfo(Cursor cursor,ItemInfo info){
+        info.setId(cursor.getString(0))
+                .setItemId(cursor.getString(1))
+                .setUserId(cursor.getString(2))
+                .setUserName(cursor.getString(3))
+                .setUserAvatar(cursor.getString(4))
+                .setBrefText(cursor.getString(5))
+                .setPreview(cursor.getString(6))
+                .setCreateAt(cursor.getLong(7))
+                .setRating(cursor.getInt(8))
+                .setStatus(cursor.getInt(9))
+                .setOrigin(cursor.getString(10))
+                .setExtra(cursor.getString(11));
     }
 
     @Override
@@ -153,7 +194,8 @@ public final class DefaultDownloadDBController implements DownloadDBController {
                 new Object[]{
                         downloadInfo.getId(), downloadInfo.getSupportRanges(),
                         downloadInfo.getCreateAt(), downloadInfo.getUri(), downloadInfo.getPath(),
-                        downloadInfo.getSize(), downloadInfo.getProgress(), downloadInfo.getStatus(),downloadInfo.getExtra()});
+                        downloadInfo.getSize(), downloadInfo.getProgress(), downloadInfo.getStatus(),
+                        downloadInfo.getExtra(),downloadInfo.getPreview(),downloadInfo.getItemId()});
     }
 
     @Override
@@ -167,6 +209,17 @@ public final class DefaultDownloadDBController implements DownloadDBController {
                         downloadThreadInfo.getUri(),
                         downloadThreadInfo.getStart(), downloadThreadInfo.getEnd(),
                         downloadThreadInfo.getProgress()});
+    }
+
+    @Override
+    public void createOrUpdate(ItemInfo itemInfo) {
+        writableDatabase.execSQL(
+                SQL_UPDATE_ITEM_INFO,
+                new Object[]{
+                        itemInfo.getId(),itemInfo.getItemId(),
+                        itemInfo.getUserId(),itemInfo.getUserName(),itemInfo.getUserAvatar(),
+                        itemInfo.getBrefText(),itemInfo.getPreview(),itemInfo.getCreateAt(),
+                        itemInfo.getRating(),itemInfo.getStatus(),itemInfo.getOrigin(),itemInfo.getExtra()});
     }
 
     @Override
@@ -184,4 +237,10 @@ public final class DefaultDownloadDBController implements DownloadDBController {
                 .delete(DefaultDownloadHelper.TABLE_NAME_DOWNLOAD_THREAD_INFO, "id=?",
                         new String[]{String.valueOf(downloadThreadInfo.getId())});
     }
+
+    @Override
+    public void delete(ItemInfo itemInfo) {
+
+    }
+
 }

@@ -75,6 +75,8 @@ public class DownloadInfo implements Serializable {
     private int supportRanges;
     private String extra;
     private Object object;
+    private String preview;
+    private String itemId;
 
     private List<DownloadThreadInfo> downloadThreadInfos;
 
@@ -153,6 +155,14 @@ public class DownloadInfo implements Serializable {
         this.id = id;
     }
 
+    public void setName(String name){
+        this.id = name;
+    }
+
+    public String getName(String name){
+        return id;
+    }
+
     public int getSupportRanges() {
         return supportRanges;
     }
@@ -183,6 +193,22 @@ public class DownloadInfo implements Serializable {
 
     public void setObject(Object object) {
         this.object = object;
+    }
+
+    public String getPreview() {
+        return preview;
+    }
+
+    public void setPreview(String preview) {
+        this.preview = preview;
+    }
+
+    public String getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(String itemId) {
+        this.itemId = itemId;
     }
 
     public List<DownloadThreadInfo> getDownloadThreadInfos() {
@@ -240,6 +266,8 @@ public class DownloadInfo implements Serializable {
         private String url;
         private String path;
         private String extra;
+        private String preview;
+        private String itemId;
 
         public Builder() {
 
@@ -268,8 +296,23 @@ public class DownloadInfo implements Serializable {
             return this;
         }
 
+        public Builder setName(String name){
+            this.id = name;
+            return this;
+        }
+
         public Builder setExtra(String extra){
             this.extra = extra;
+            return this;
+        }
+
+        public Builder setItemId(String itemId) {
+            this.itemId = itemId;
+            return this;
+        }
+
+        public Builder setPreview(String preview){
+            this.preview = preview;
             return this;
         }
 
@@ -301,6 +344,9 @@ public class DownloadInfo implements Serializable {
             } else {
                 downloadInfo.setId(id);
             }
+
+            downloadInfo.preview = preview;
+            downloadInfo.itemId = itemId;
 
             return downloadInfo;
         }

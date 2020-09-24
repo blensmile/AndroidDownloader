@@ -5,6 +5,7 @@ import android.content.Context;
 import com.ixuea.android.downloader.db.DownloadDBController;
 import com.ixuea.android.downloader.domain.DownloadInfo;
 import com.ixuea.android.downloader.domain.DownloadThreadInfo;
+import com.ixuea.android.downloader.domain.ItemInfo;
 import com.ixuea.android.downloader.simple.domain.MyBusinessInfLocal;
 import com.ixuea.android.downloader.simple.domain.MyDownloadInfLocal;
 import com.ixuea.android.downloader.simple.domain.MyDownloadThreadInfoLocal;
@@ -136,6 +137,11 @@ public class DBController implements DownloadDBController {
     }
 
     @Override
+    public void createOrUpdate(ItemInfo itemInfo) {
+
+    }
+
+    @Override
     public void delete(DownloadInfo downloadInfo) {
         try {
             myDownloadInfLocalDao.deleteById(downloadInfo.getId());
@@ -151,6 +157,11 @@ public class DBController implements DownloadDBController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void delete(ItemInfo itemInfo) {
+
     }
 
     private List<DownloadInfo> convertDownloadInfos(List<MyDownloadInfLocal> infos) {
