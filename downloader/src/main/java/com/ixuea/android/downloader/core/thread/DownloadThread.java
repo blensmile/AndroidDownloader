@@ -49,28 +49,18 @@ public class DownloadThread implements Runnable {
     @Override
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
-        //    while (!(downloadInfo.isPause() || downloadThreadInfo.isThreadDownloadSuccess())) {
-
         checkPause();
         try {
             executeDownload();
         } catch (DownloadException e) {
-
-            //        if (retryDownloadCount >= config.getRetryDownloadCount()) {
-            downloadInfo.setStatus(DownloadInfo.STATUS_ERROR);
-            downloadInfo.setException(e);
-            downloadResponse.onStatusChanged(downloadInfo);
-            downloadResponse.handleException(e);
-            //        }
-            //
-            //        retryDownloadCount++;
+            downloadResponse.handleException(downloadInfo,e);
+            downloadProgressListener.onDownloadFail(e);
         }
-        //    checkPause();
-        //    }
     }
 
     private void executeDownload() {
         HttpURLConnection httpConnection = null;
+        DownloadException exception = null;
         try {
             final URL url = new URL(downloadThreadInfo.getUri());
             httpConnection = (HttpURLConnection) url.openConnection();
@@ -117,21 +107,24 @@ public class DownloadThread implements Runnable {
                 //downloadInfo success
                 downloadProgressListener.onDownloadSuccess();
             } else {
-                throw new DownloadException(DownloadException.EXCEPTION_SERVER_SUPPORT_CODE,
+                exception =  new DownloadException(DownloadException.EXCEPTION_SERVER_SUPPORT_CODE,
                         "UnSupported response code:" + responseCode);
             }
             checkPause();
         } catch (ProtocolException e) {
-            throw new DownloadException(DownloadException.EXCEPTION_PROTOCOL, "Protocol error", e);
+            exception =  new DownloadException(DownloadException.EXCEPTION_PROTOCOL, "Protocol error", e);
         } catch (IOException e) {
-            throw new DownloadException(DownloadException.EXCEPTION_IO_EXCEPTION, "IO error", e);
+            exception = new DownloadException(DownloadException.EXCEPTION_IO_EXCEPTION, "IO error", e);
         } catch (DownloadPauseException e) {
             //TODO process pause logic
         } catch (Exception e) {
-            throw new DownloadException(DownloadException.EXCEPTION_OTHER, "other error", e);
+            exception = new DownloadException(DownloadException.EXCEPTION_OTHER, "other error", e);
         } finally {
             if (httpConnection != null) {
                 httpConnection.disconnect();
+            }
+            if(exception!=null){
+                throw exception;
             }
         }
     }
@@ -150,6 +143,8 @@ public class DownloadThread implements Runnable {
         void onProgress();
 
         void onDownloadSuccess();
+
+        void onDownloadFail(DownloadException exception);
     }
 
 

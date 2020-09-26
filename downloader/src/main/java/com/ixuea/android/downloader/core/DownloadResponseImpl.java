@@ -94,7 +94,9 @@ public class DownloadResponseImpl implements DownloadResponse {
     }
 
     @Override
-    public void handleException(DownloadException exception) {
-
+    public void handleException(DownloadInfo downloadInfo,DownloadException exception) {
+        downloadInfo.setStatus(DownloadInfo.STATUS_ERROR);
+        downloadInfo.setException(exception);
+        onStatusChanged(downloadInfo);
     }
 }

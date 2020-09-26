@@ -89,9 +89,10 @@ public final class DefaultDownloadDBController implements DownloadDBController {
                 inflateDownloadThreadInfo(downloadCursor, downloadThreadInfo);
             }
 
+            downloadCursor.close();
             downloadInfo.setDownloadThreadInfos(downloadThreads);
-
         }
+        cursor.close();
         return downloads;
     }
 
@@ -106,6 +107,7 @@ public final class DefaultDownloadDBController implements DownloadDBController {
             inflateItemInfo(cursor,info);
             infoList.add(info);
         }
+        cursor.close();
         return infoList;
     }
 
@@ -121,6 +123,7 @@ public final class DefaultDownloadDBController implements DownloadDBController {
             downloads.add(downloadInfo);
             inflateDownloadInfo(cursor, downloadInfo);
         }
+        cursor.close();
         return downloads;
     }
 
@@ -174,9 +177,10 @@ public final class DefaultDownloadDBController implements DownloadDBController {
             DownloadInfo downloadInfo = new DownloadInfo();
 
             inflateDownloadInfo(cursor, downloadInfo);
-
+            cursor.close();
             return downloadInfo;
         }
+        cursor.close();
         return null;
     }
 

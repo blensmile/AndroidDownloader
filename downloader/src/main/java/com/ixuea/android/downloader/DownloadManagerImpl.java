@@ -12,6 +12,7 @@ import com.ixuea.android.downloader.core.task.DownloadTask;
 import com.ixuea.android.downloader.db.DefaultDownloadDBController;
 import com.ixuea.android.downloader.db.DownloadDBController;
 import com.ixuea.android.downloader.domain.DownloadInfo;
+import com.ixuea.android.downloader.exception.DownloadException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -194,6 +195,12 @@ public final class DownloadManagerImpl implements DownloadManager, DownloadTaskL
     public void onDownloadSuccess(DownloadInfo downloadInfo) {
         cacheDownloadTask.remove(downloadInfo.getId());
         downloadingCaches.remove(downloadInfo);
+        prepareDownloadNextTask();
+    }
+
+    @Override
+    public void onDownloadFailed(DownloadInfo downloadInfo,DownloadException exp) {
+        cacheDownloadTask.remove(downloadInfo.getId());
         prepareDownloadNextTask();
     }
 

@@ -121,7 +121,8 @@ public class DownloadTaskImpl implements DownloadTask, OnGetFileInfoListener,
 
     @Override
     public void onFailed(DownloadException exception) {
-
+        if(downloadTaskListener!=null)
+            downloadTaskListener.onDownloadFailed(downloadInfo,exception);
     }
 
     @Override
@@ -155,6 +156,13 @@ public class DownloadTaskImpl implements DownloadTask, OnGetFileInfoListener,
         }
     }
 
+    @Override
+    public void onDownloadFail(DownloadException exception) {
+        if (downloadTaskListener != null) {
+            downloadTaskListener.onDownloadFailed(downloadInfo,exception);
+        }
+    }
+
     private void computerDownloadProgress() {
         progress = 0;
         List<DownloadThreadInfo> downloadThreadInfos = downloadInfo.getDownloadThreadInfos();
@@ -173,5 +181,6 @@ public class DownloadTaskImpl implements DownloadTask, OnGetFileInfoListener,
     public interface DownloadTaskListener {
 
         void onDownloadSuccess(DownloadInfo downloadInfo);
+        void onDownloadFailed(DownloadInfo downloadInfo,DownloadException exp);
     }
 }
