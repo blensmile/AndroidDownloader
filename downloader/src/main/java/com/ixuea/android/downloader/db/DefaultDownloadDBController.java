@@ -14,6 +14,7 @@ import java.util.List;
 
 import static com.ixuea.android.downloader.domain.DownloadInfo.STATUS_COMPLETED;
 import static com.ixuea.android.downloader.domain.DownloadInfo.STATUS_PAUSED;
+import static com.ixuea.android.downloader.domain.DownloadInfo.STATUS_REMOVED;
 
 /**
  * Created by ixuea(http://a.ixuea.com/3) on 17/1/23.
@@ -67,8 +68,8 @@ public final class DefaultDownloadDBController implements DownloadDBController {
     @Override
     public List<DownloadInfo> findAllDownloading() {
         Cursor cursor = readableDatabase.query(DefaultDownloadHelper.TABLE_NAME_DOWNLOAD_INFO,
-                DOWNLOAD_INFO_COLUMNS, "status!=?", new String[]{
-                        String.valueOf(STATUS_COMPLETED)}, null, null, "createAt desc");
+                DOWNLOAD_INFO_COLUMNS, "status!=? and status!=?", new String[]{
+                        String.valueOf(STATUS_COMPLETED),String.valueOf(STATUS_REMOVED)}, null, null, "createAt desc");
 
         List<DownloadInfo> downloads = new ArrayList<>();
         Cursor downloadCursor;
