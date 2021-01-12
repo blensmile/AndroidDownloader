@@ -45,7 +45,7 @@ public final class DefaultDownloadDBController implements DownloadDBController {
             DefaultDownloadHelper.TABLE_NAME_DOWNLOAD_INFO);
 
     public static final String SQL_UPDATE_DOWNLOADING_INFO_STATUS = String.format(
-            "UPDATE %s SET status=? WHERE status!=?;",
+            "UPDATE %s SET status=? WHERE status!=? and status!=?;",
             DefaultDownloadHelper.TABLE_NAME_DOWNLOAD_INFO);
 
     public static final String SQL_UPDATE_ITEM_INFO = String.format(
@@ -128,6 +128,22 @@ public final class DefaultDownloadDBController implements DownloadDBController {
         return downloads;
     }
 
+    @Override
+    public List<DownloadInfo> findAllRemoved(){
+        Cursor cursor = readableDatabase.query(DefaultDownloadHelper.TABLE_NAME_DOWNLOAD_INFO,
+                DOWNLOAD_INFO_COLUMNS, "status=?", new String[]{
+                        String.valueOf(STATUS_REMOVED)}, null, null, "createAt desc");
+
+        List<DownloadInfo> downloads = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            DownloadInfo downloadInfo = new DownloadInfo();
+            downloads.add(downloadInfo);
+            inflateDownloadInfo(cursor, downloadInfo);
+        }
+        cursor.close();
+        return downloads;
+    }
+
     private void inflateDownloadThreadInfo(Cursor cursor,
                                            DownloadThreadInfo downloadThreadInfo) {
         downloadThreadInfo.setId(cursor.getInt(0));
@@ -189,7 +205,7 @@ public final class DefaultDownloadDBController implements DownloadDBController {
     public void pauseAllDownloading() {
         writableDatabase.execSQL(
                 SQL_UPDATE_DOWNLOADING_INFO_STATUS,
-                new Object[]{STATUS_PAUSED, STATUS_COMPLETED});
+                new Object[]{STATUS_PAUSED, STATUS_COMPLETED,STATUS_REMOVED});
     }
 
     @Override
@@ -235,6 +251,16 @@ public final class DefaultDownloadDBController implements DownloadDBController {
                 .delete(DefaultDownloadHelper.TABLE_NAME_DOWNLOAD_THREAD_INFO, "downloadInfoId=?",
                         new String[]{String.valueOf(downloadInfo.getId())});
     }
+
+    @Override
+    public void remove(DownloadInfo downloadInfo) {
+        writableDatabase
+                .delete(DefaultDownloadHelper.TABLE_NAME_DOWNLOAD_THREAD_INFO, "downloadInfoId=?",
+                        new String[]{String.valueOf(downloadInfo.getId())});
+        downloadInfo.setDownloadThreadInfos(null);
+        createOrUpdate(downloadInfo);
+    }
+
 
     @Override
     public void delete(DownloadThreadInfo downloadThreadInfo) {

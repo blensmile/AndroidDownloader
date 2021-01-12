@@ -16,6 +16,8 @@ public interface DownloadDBController {
 
     List<DownloadInfo> findAllDownloaded();
 
+    List<DownloadInfo> findAllRemoved();
+
     DownloadInfo findDownloadedInfoById(String id);
 
     void pauseAllDownloading();
@@ -27,6 +29,8 @@ public interface DownloadDBController {
     void createOrUpdate(ItemInfo itemInfo);
 
     void delete(DownloadInfo downloadInfo);
+
+    void remove(DownloadInfo downloadInfo);
 
     void delete(DownloadThreadInfo download);
 

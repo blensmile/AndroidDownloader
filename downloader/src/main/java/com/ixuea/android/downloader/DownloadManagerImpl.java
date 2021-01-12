@@ -125,7 +125,7 @@ public final class DownloadManagerImpl implements DownloadManager, DownloadTaskL
         downloadInfo.setStatus(DownloadInfo.STATUS_REMOVED);
         cacheDownloadTask.remove(downloadInfo.getId());
         downloadingCaches.remove(downloadInfo);
-        downloadDBController.delete(downloadInfo);
+        downloadDBController.remove(downloadInfo);
         downloadResponse.onStatusChanged(downloadInfo);
     }
 
@@ -179,7 +179,8 @@ public final class DownloadManagerImpl implements DownloadManager, DownloadTaskL
     public void pauseAll() {
         if (isExecute()) {
             for (DownloadInfo downloadInfo : downloadingCaches) {
-                pauseInner(downloadInfo);
+                if(downloadInfo.getStatus() != DownloadInfo.STATUS_REMOVED)
+                    pauseInner(downloadInfo);
             }
         }
     }
